@@ -83,7 +83,11 @@ def import_topic(bag: BagReader, topic: str, msg_type: Any, store: h5py.File,
                 pass
         stamps.append(stamp)
     if datas:
-        store.create_dataset(f"{sanitize(topic)}:data", data=datas)
+        try:
+            store.create_dataset(f"{sanitize(topic)}:data", data=datas)
+        except ValueError:
+            bag.logger.warning(f'Failed to import topic {topic}')
+            return False
     if stamps:
         store.create_dataset(f"{sanitize(topic)}:stamp", data=stamps)
     return len(datas) > 0 or len(stamps) > 0
