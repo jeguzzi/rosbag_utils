@@ -10,7 +10,7 @@ from jeguzzi_rosbag_utils.export_hdf5 import main, reader
 # and ouputs a numpy array
 
 @reader(sensor_msgs.msg.BatteryState)
-def pose(msg: sensor_msgs.msg.BatteryState) -> np.ndarray:
+def battery_state(msg: sensor_msgs.msg.BatteryState) -> np.ndarray:
     return np.array([msg.voltage, msg.percentage])
 
 
