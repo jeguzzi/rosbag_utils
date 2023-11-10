@@ -22,8 +22,8 @@ setup(
         'console_scripts': [
             'read = jeguzzi_rosbag_utils.reader:main',
             'video = jeguzzi_rosbag_utils.h264_video:main',
-            'hdf5 = jeguzzi_rosbag_utils.export_h5df:main',
-            'hdf5_sync = jeguzzi_rosbag_utils.export_h5df_sync:main',
+            'hdf5 = jeguzzi_rosbag_utils.export_hdf5:main',
+            'hdf5_sync = jeguzzi_rosbag_utils.export_hdf5_sync:main',
         ],
     },
 )
