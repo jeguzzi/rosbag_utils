@@ -28,7 +28,6 @@ def make_video(bag: BagReader, topic: str, out: str, use_header_stamps: bool = T
             packets.append(np.frombuffer(msg.data, np.uint8))
     data = np.concatenate(packets)
 
-    data, _stamps = h264_buffer_and_stamps(bag, topic)
     with tempfile.NamedTemporaryFile() as f:
         f.write(data.tobytes())
         subprocess.call(f'ffmpeg -v debug -y -i {f.name} -vcodec copy {out}', shell=True)
