@@ -1,7 +1,8 @@
 import argparse
-from typing import Any, Iterator, List
+import json
+import subprocess
 import tempfile
-import os
+from typing import Any, Iterator, List, Tuple
 
 import numpy as np
 import libmedia_codec
@@ -9,39 +10,30 @@ import libmedia_codec
 from .reader import BagReader, header_stamp, sanitize
 
 
-def h264_frames(video_decoder: libmedia_codec.H264Decoder, data: bytes) -> Iterator[np.ndarray]:
-    frames = video_decoder.decode(data)
-    for frame_data in frames:
-        (frame, width, height, ls) = frame_data
-        if frame:
-            frame = np.frombuffer(frame, dtype=np.ubyte, count=len(frame))
-            yield frame.reshape((height, width, 3))
 
-
-def h264_stamps(bag: BagReader, topic: str, use_header_stamps: bool = True) -> List[int]:
+def make_video(bag: BagReader, topic: str, out: str, use_header_stamps: bool = True) -> List[int]:
     video_decoder = libmedia_codec.H264Decoder()
+    packets: List[np.ndarray] = []
     stamps: List[int] = []
     for _, msg, stamp in bag.get_messages(topics=[topic]):
-        frames = h264_frames(video_decoder, msg.data.tobytes())
+        frames = video_decoder.decode(msg.data.tobytes())
+        images = [np.frombuffer(frame, dtype=np.ubyte, count=len(frame)).reshape((height, width, 3))
+                  for frame, width, height, ls in frames]
         if use_header_stamps:
             stamp = header_stamp(msg)
-        for frame in frames:
+        for _ in images:
             stamps.append(stamp)
-    return stamps
+        if images:
+            # only include packets that have images in them
+            packets.append(np.frombuffer(msg.data, np.uint8))
+    data = np.concatenate(packets)
 
-
-def h264_buffer(bag: BagReader, topic: str) -> np.ndarray:
-    return np.concatenate(
-        [np.frombuffer(frame.data, np.uint8)
-         for _, frame, _ in bag.get_messages(topics=[topic])])
-
-
-def make_video(bag: BagReader, topic: str, out: str) -> None:
-    # read the whole data
-    data = h264_buffer(bag, topic)
     with tempfile.NamedTemporaryFile() as f:
         f.write(data.tobytes())
-        os.system(f'ffmpeg -i {f.name} -vcodec copy {out}')
+        subprocess.call(f'ffmpeg -v debug -y -i {f.name} -vcodec copy {out}', shell=True)
+    metadata = json.loads(subprocess.check_output(f'ffprobe -print_format json -loglevel fatal -show_streams -count_frames -i {out}', shell=True))
+    frame_count = int(metadata['streams'][0]['nb_frames'])
+    return stamps[-frame_count:]
 
 
 def main(args: Any = None) -> None:
