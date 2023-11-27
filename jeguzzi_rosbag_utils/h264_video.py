@@ -32,7 +32,7 @@ def make_video(bag: BagReader, topic: str, out: str, use_header_stamps: bool = T
         f.write(data.tobytes())
         subprocess.call(f'ffmpeg -v debug -y -i {f.name} -vcodec copy {out}', shell=True)
     metadata = json.loads(subprocess.check_output(f'ffprobe -print_format json -loglevel fatal -show_streams -count_frames -i {out}', shell=True))
-    frame_count = metadata['streams'][0]['nb_frames']
+    frame_count = int(metadata['streams'][0]['nb_frames'])
     return stamps[-frame_count:]
 
 
