@@ -31,9 +31,9 @@ def interpolate(target_times: np.ndarray, times: np.ndarray, data: np.ndarray,
     return f(target_times)
 
 
-def get_rosbag_options(path: str, serialization_format: str = 'cdr'
+def get_rosbag_options(path: str, serialization_format: str = 'cdr', storage_id: str = ''
                        ) -> Tuple[rosbag2_py.StorageOptions, rosbag2_py.ConverterOptions]:
-    storage_options = rosbag2_py.StorageOptions(uri=path, storage_id='sqlite3')
+    storage_options = rosbag2_py.StorageOptions(uri=path, storage_id=storage_id)
     converter_options = rosbag2_py.ConverterOptions(
         input_serialization_format=serialization_format,
         output_serialization_format=serialization_format)
@@ -61,9 +61,9 @@ def sanitize(name: str, replacement: str = "__") -> str:
 
 class BagReader:
 
-    def __init__(self, bag_path: str):
+    def __init__(self, bag_path: str, storage_id: str = ''):
         self.logger = rclpy.logging.get_logger("rosbag utils")
-        self.storage_options, self.converter_options = get_rosbag_options(bag_path)
+        self.storage_options, self.converter_options = get_rosbag_options(bag_path, storage_id=storage_id)
         reader = rosbag2_py.SequentialReader()
         reader.open(self.storage_options, self.converter_options)
         topic_types = reader.get_all_topics_and_types()
