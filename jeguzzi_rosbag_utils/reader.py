@@ -16,13 +16,12 @@ import rclpy.logging
 Message = Any
 
 
-def reader(t: Any) -> Optional[Callable[[Any], Callable[[Any], Optional[np.ndarray]]]]:
-    if t is not None:
-        def g(f: Callable[[Any], np.ndarray]) -> Callable[[Any], Optional[np.ndarray]]:
+def reader(t: Any) -> Callable[[Any], Callable[[Any], Optional[np.ndarray]]]:
+    def g(f: Callable[[Any], np.ndarray]) -> Callable[[Any], Optional[np.ndarray]]:
+        if t is not None:
             setattr(t, 'reader', f)
-            return f
-        return g
-    return None
+        return f
+    return g
 
 
 def interpolate(target_times: np.ndarray, times: np.ndarray, data: np.ndarray,
