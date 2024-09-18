@@ -86,12 +86,12 @@ def imu(msg: sensor_msgs.msg.Imu) -> np.ndarray:
 
 @reader(sensor_msgs.msg.Image)
 def image(msg: sensor_msgs.msg.Image) -> np.ndarray:
-    return np.array([msg.data]).reshape((msg.height, msg.width, -1))
+    return np.asarray(msg.data).reshape((msg.height, msg.width, -1))
 
 
 @reader(sensor_msgs.msg.LaserScan)
 def laser_scan(msg: sensor_msgs.msg.LaserScan) -> np.ndarray:
-    return np.array([msg.ranges])
+    return np.asarray(msg.ranges)
 
 
 @reader(sensor_msgs.msg.CameraInfo)
