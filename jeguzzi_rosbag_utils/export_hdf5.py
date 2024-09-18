@@ -1,19 +1,13 @@
 import argparse
 import os
-from typing import Any, Dict, Callable, Optional, Collection
+from typing import Any, Collection
 
-import numpy as np
 import h5py
 
-import nav_msgs.msg
-import geometry_msgs.msg
-import sensor_msgs.msg
-
 try:
-    from robomaster_msgs.msg import H264Packet, AudioData
+    from robomaster_msgs.msg import H264Packet
 except ImportError:
     H264Packet = None
-    AudioData = None
 
 try:
     from h264_msgs.msg import Packet
@@ -21,36 +15,7 @@ except:
     Packet = None
 
 
-from .reader import BagReader, header_stamp, sanitize, reader
-
-
-_readers: Dict[Any, Callable[[Any], np.ndarray]] = {}
-
-
-@reader(nav_msgs.msg.Odometry)
-def odom(msg: nav_msgs.msg.Odometry) -> np.ndarray:
-    ps = msg.pose.pose.position
-    qs = msg.pose.pose.orientation
-    vs = msg.twist.twist.linear
-    ws = msg.twist.twist.angular
-    return np.array([ps.x, ps.y, ps.z, qs.x, qs.y, qs.z, qs.w, vs.x, vs.y, vs.z, ws.x, ws.y, ws.z])
-
-
-@reader(geometry_msgs.msg.PoseStamped)
-def pose(msg: geometry_msgs.msg.PoseStamped) -> np.ndarray:
-    ps = msg.pose.position
-    qs = msg.pose.orientation
-    return np.array([ps.x, ps.y, ps.z, qs.x, qs.y, qs.z, qs.w])
-
-
-@reader(AudioData)
-def audio(msg: AudioData) -> np.ndarray:
-    return np.asarray(msg.data)
-
-
-@reader(sensor_msgs.msg.JointState)
-def joint_state(msg: sensor_msgs.msg.JointState) -> np.ndarray:
-    return np.asarray(msg.position)
+from .reader import BagReader, header_stamp, sanitize
 
 
 def import_topic(bag: BagReader, topic: str, msg_type: Any, store: h5py.File,
