@@ -10,10 +10,10 @@ import geometry_msgs.msg
 import sensor_msgs.msg
 
 try:
-    import robomaster_msgs.msg
-    H264Packet = robomaster_msgs.msg.H264Packet
+    from robomaster_msgs.msg import H264Packet, AudioData
 except ImportError:
     H264Packet = None
+    AudioData = None
 
 try:
     from h264_msgs.msg import Packet
@@ -50,8 +50,8 @@ def pose(msg: geometry_msgs.msg.PoseStamped) -> np.ndarray:
     return np.array([ps.x, ps.y, ps.z, qs.x, qs.y, qs.z, qs.w])
 
 
-@reader(robomaster_msgs.msg.AudioData)
-def audio(msg: robomaster_msgs.msg.AudioData) -> np.ndarray:
+@reader(AudioData)
+def audio(msg: AudioData) -> np.ndarray:
     return np.asarray(msg.data)
 
 
