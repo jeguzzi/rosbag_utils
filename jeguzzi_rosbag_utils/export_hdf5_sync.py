@@ -109,6 +109,8 @@ def export_bag(bag_file: str,
         for topic in topics:
             bag.logger.info(f'Will try to import {topic}')
             msg_type = bag.get_message_type(topic)
+            if msg_type is None:
+                continue
             if msg_type in (H264Packet, Packet):
                 t = import_h264_stamps(bag, topic, msg_type, store,
                                        use_header_stamps)

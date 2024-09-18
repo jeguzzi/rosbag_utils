@@ -195,6 +195,8 @@ Topics:
         while reader.has_next():
             (topic, data, t) = reader.read_next()
             msg_type = self.get_message_type(topic)
+            if msg_type is None:
+                continue
             try:
                 msg = deserialize_message(data, msg_type)
             except (TypeError, Exception) as e:
@@ -203,8 +205,11 @@ Topics:
                 continue
             yield (topic, msg, t)
 
-    def get_message_type(self, topic: str) -> Type:
-        return get_message(self.type_map[topic])
+    def get_message_type(self, topic: str) -> Optional[Type]:
+        try:
+            return get_message(self.type_map[topic])
+        except ModuleNotFoundError:
+            return None
 
     def import_topic(
             self,
