@@ -20,7 +20,7 @@ try:
 except:
     Packet = None
 
-from .h264_video import h264_stamps, make_video
+
 from .reader import BagReader, header_stamp, sanitize
 
 
@@ -96,6 +96,8 @@ def import_topic(bag: BagReader, topic: str, msg_type: Any, store: h5py.File,
 def import_h264_stamps(bag: BagReader, topic: str, topic_type: Any,
                        store: h5py.File, use_header_stamps: bool = True
                        ) -> bool:
+    from .h264_video import h264_stamps
+
     stamps = h264_stamps(bag, topic, use_header_stamps)
     if stamps:
         store.create_dataset(f"{sanitize(topic)}:stamp", data=stamps)
@@ -118,6 +120,9 @@ def export_bag(bag_file: str, topics: Collection[str] = [], exclude: Collection[
             if msg_type in (H264Packet, Packet):
                 t = import_h264_stamps(bag, topic, msg_type, store, use_header_stamps)
                 if should_make_video:
+
+                    from .h264_video import make_video
+
                     out = f'{bag_name}__{sanitize(topic)}.{video_format}'
                     make_video(bag, topic, out)
             else:
