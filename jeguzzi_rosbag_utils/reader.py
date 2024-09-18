@@ -44,7 +44,7 @@ def message_type_is_known(msg: str) -> bool:
     try:
         get_message(msg)
         return True
-    except AttributeError:
+    except (AttributeError, ModuleNotFoundError):
         return False
 
 
