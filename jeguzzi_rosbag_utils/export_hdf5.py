@@ -21,17 +21,10 @@ except:
     Packet = None
 
 
-from .reader import BagReader, header_stamp, sanitize
+from .reader import BagReader, header_stamp, sanitize, reader
 
 
 _readers: Dict[Any, Callable[[Any], np.ndarray]] = {}
-
-
-def reader(t: Any) -> Callable[[Any], Callable[[Any], Optional[np.ndarray]]]:
-    def g(f: Callable[[Any], np.ndarray]) -> Callable[[Any], Optional[np.ndarray]]:
-        setattr(t, 'reader', f)
-        return f
-    return g
 
 
 @reader(nav_msgs.msg.Odometry)
