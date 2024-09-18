@@ -17,10 +17,11 @@ Message = Any
 
 
 def reader(t: Any) -> Callable[[Any], Callable[[Any], Optional[np.ndarray]]]:
-    def g(f: Callable[[Any], np.ndarray]) -> Callable[[Any], Optional[np.ndarray]]:
-        setattr(t, 'reader', f)
-        return f
-    return g
+    if t is not None:
+        def g(f: Callable[[Any], np.ndarray]) -> Callable[[Any], Optional[np.ndarray]]:
+            setattr(t, 'reader', f)
+            return f
+        return g
 
 
 def interpolate(target_times: np.ndarray, times: np.ndarray, data: np.ndarray,

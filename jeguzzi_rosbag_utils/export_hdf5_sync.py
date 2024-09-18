@@ -9,9 +9,22 @@ import scipy.interpolate
 import nav_msgs.msg
 import geometry_msgs.msg
 import sensor_msgs.msg
-import robomaster_msgs.msg
-import h264_msgs.msg
-import uwb_msgs.msg
+
+try:
+    from robomaster_msgs.msg import AudioData, H264Packet
+except ImportError:
+    AudioData = None
+    H264Packet = None
+
+try:
+    from h264_msgs.msg import Packet
+except ImportError:
+    Packet = None
+
+try:
+    from uwb_msgs.msg import Ranges as UWBRanges
+except ImportError:
+    UWBRanges = None
 
 from .h264_video import h264_stamps, make_video
 from .reader import BagReader, header_stamp, sanitize
@@ -43,8 +56,8 @@ def pose(msg: geometry_msgs.msg.PoseStamped) -> np.ndarray:
     return np.array([ps.x, ps.y, ps.z, qs.x, qs.y, qs.z, qs.w])
 
 
-@reader(robomaster_msgs.msg.AudioData)
-def audio(msg: robomaster_msgs.msg.AudioData) -> np.ndarray:
+@reader(AudioData)
+def audio(msg: AudioData) -> np.ndarray:
     return np.asarray(msg.data)
 
 
@@ -53,8 +66,8 @@ def joint_state(msg: sensor_msgs.msg.JointState) -> np.ndarray:
     return np.asarray(msg.position)
 
 
-@reader(uwb_msgs.msg.Ranges)
-def uwb_ranges(msg: uwb_msgs.msg.Ranges) -> np.ndarray:
+@reader(UWBRanges)
+def uwb_ranges(msg: UWBRanges) -> np.ndarray:
     return np.asarray(msg.range)
 
 
@@ -139,7 +152,7 @@ def export_bag(bag_file: str, topics: Collection[str] = [], exclude: Collection[
         for topic in topics:
             bag.logger.info(f'Will try to import {topic}')
             msg_type = bag.get_message_type(topic)
-            if msg_type in (robomaster_msgs.msg.H264Packet, h264_msgs.msg.Packet):
+            if msg_type in (H264Packet, h264_msgs.msg.Packet):
                 t = import_h264_stamps(bag, topic, msg_type, store, use_header_stamps)
                 if should_make_video:
                     out = f'{bag_name}__{sanitize(topic)}.{video_format}'
